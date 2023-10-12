@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id ("io.freefair.lombok") version "8.0.1"
     id ("com.github.johnrengelman.shadow") version "7.1.0"
-    id ("xyz.jpenilla.run-paper") version "2.0.1"
 }
 
 group = 'net.biryeongtrain'
@@ -23,7 +22,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.26")
     testCompileOnly("org.projectlombok:lombok:1.18.26")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.26")
-
 }
 
 def targetJavaVersion = 17
@@ -45,11 +43,11 @@ tasks.withType(JavaCompile).configureEach {
 
     it.options.release = 17
 }
-tasks {
-    runServer {
-        minecraftVersion("1.19.4")
-    }
-}
+//tasks {
+//    runServer {
+//        minecraftVersion("1.19.4")
+//    }
+//}
 processResources {
     def props = [version: version]
     inputs.properties props
@@ -58,4 +56,19 @@ processResources {
         expand props
     }
 }
+tasks.register('copyPluginJar', Copy) {
+    String result = rootProject.name + "-" + project.version + "-all.jar"
+    String result_remapped = project.name + "-" + project.version +  "-SNAPSHOT.jar"
+    println(result)
+    from ("build/libs"){
+        include(result)
+        include(result_remapped)
+    }
+    var dir = rootDir.toPath().resolve("runTask").resolve("plugins")
+    println(dir)
+    into(dir)
+}
 
+
+jar.finalizedBy(shadowJar)
+shadowJar.finalizedBy(copyPluginJar)
